@@ -1235,7 +1235,7 @@ public class RealVoltDB implements VoltDBInterface, RestoreAgent.Callback, HostM
                 }
                 m_MPI = new MpInitiator(m_messenger, localHSIds, getStatsAgent(), m_globalServiceElector.getLeaderElectorNode());
                 m_iv2Initiators.put(MpInitiator.MP_INIT_PID, m_MPI);
-
+                hostLog.info("The sequential number of the host:" + m_globalServiceElector.getLeaderElectorNode());
                 // Make a list of HDIds to join
                 Map<Integer, Long> partsToHSIdsToRejoin = new HashMap<>();
                 for (Initiator init : m_iv2Initiators.values()) {
