@@ -255,7 +255,7 @@ public class TestPlansGroupBy extends PlannerTestCase {
     public void basicTestAggregateOptimizationWithIndex() {
         AbstractPlanNode p;
         List<AbstractPlanNode> pns;
-
+        /*
         if (isPlanningForLargeQueries()) {
             validatePlan("SELECT A, count(B) from R2 where B > 2 group by A;",
                          PRINT_JSON_PLAN,
@@ -318,6 +318,7 @@ public class TestPlansGroupBy extends PlannerTestCase {
                                                           PlanNodeType.PARTIALAGGREGATE,
                                                           PlanNodeType.PROJECTION)));
         }
+        */
         if (isPlanningForLargeQueries()) {
             validatePlan(
                     "SELECT F_D1, F_VAL1, MAX(F_VAL2) FROM F WHERE F_D1 > 0 GROUP BY F_D1, F_VAL1 ORDER BY F_D1, MAX(F_VAL2)",
@@ -332,7 +333,7 @@ public class TestPlansGroupBy extends PlannerTestCase {
                              new AggregateNodeMatcher(PlanNodeType.AGGREGATE,
                                                       ExpressionType.AGGREGATE_MAX),
                              PlanNodeType.ORDERBY,
-                             new PlanWithInlineNodes(PlanNodeType.INDEXSCAN,
+                             new PlanWithInlineNodes(new IndexScanPlanMatcher("COL_F_TREE1"),
                                                      PlanNodeType.PROJECTION)));
         } else {
             // Partition IndexScan with HASH aggregate is optimized to use Partial aggregate -
