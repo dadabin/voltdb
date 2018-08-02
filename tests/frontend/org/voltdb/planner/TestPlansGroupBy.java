@@ -255,7 +255,6 @@ public class TestPlansGroupBy extends PlannerTestCase {
     public void basicTestAggregateOptimizationWithIndex() {
         AbstractPlanNode p;
         List<AbstractPlanNode> pns;
-        /*
         if (isPlanningForLargeQueries()) {
             validatePlan("SELECT A, count(B) from R2 where B > 2 group by A;",
                          PRINT_JSON_PLAN,
@@ -318,17 +317,26 @@ public class TestPlansGroupBy extends PlannerTestCase {
                                                           PlanNodeType.PARTIALAGGREGATE,
                                                           PlanNodeType.PROJECTION)));
         }
-        */
         if (isPlanningForLargeQueries()) {
             validatePlan(
                     "SELECT F_D1, F_VAL1, MAX(F_VAL2) FROM F WHERE F_D1 > 0 GROUP BY F_D1, F_VAL1 ORDER BY F_D1, MAX(F_VAL2)",
                     PRINT_JSON_PLAN,
                     fragSpec(PlanNodeType.SEND,
-                             PlanNodeType.ORDERBY,  // Statement Level Orderby.
-                                                    // This has to be a parent of the
-                                                    // AGGREGATE node.
-                             PlanNodeType.AGGREGATE,
-                             PlanNodeType.RECEIVE),
+                             PlanNodeType.ORDERBY,   // Statement Level Orderby.
+                                                     // This has to be a parent of the
+                                                     // AGGREGATE node.
+                             PlanNodeType.AGGREGATE, // Coordinator MAX
+                             PlanNodeType.ORDERBY,   // Order by for serial aggregation, since
+                                                     // the partition key, F_PKEY, is not in the
+                                                     // group by list.
+                             PlanNodeType.RECEIVE),  // Why isn't this a MERGERECEIVE node?  Maybe
+                                                     // because the output of the AGGREGATE node
+                                                     // in the distributed fragment does not produce
+                                                     // an obviously sorted result.  If the
+                                                     // group by keys were in the early columns
+                                                     // then we could arrange for it to be sorted
+                                                     // by group key values.  It's not clear if that
+                                                     // could possibly help us, though.
                     fragSpec(PlanNodeType.SEND,
                              new AggregateNodeMatcher(PlanNodeType.AGGREGATE,
                                                       ExpressionType.AGGREGATE_MAX),
