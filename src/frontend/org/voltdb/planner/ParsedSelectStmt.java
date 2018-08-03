@@ -2758,8 +2758,9 @@ public class ParsedSelectStmt extends AbstractParsedStmt {
         List<Integer> gbOrigIndexes       = new ArrayList<>();
         List<Integer> answerPermutation   = new ArrayList<>();
         List<ParsedColInfo> answerColumns = new ArrayList<>(numGroupByColumns);
-        // Remember which columns we have used, but setting
-        // the index here to -1 when we use them.
+        // We want to remember which columns we have used.  Set
+        // gbOrigIndexes to the identity permutation.  We will set
+        // elements to -1 if we find them in m_orderColumns.
         for (int idx = 0; idx < numGroupByColumns; idx += 1) {
             gbOrigIndexes.add(idx);
         }
@@ -2767,6 +2768,8 @@ public class ParsedSelectStmt extends AbstractParsedStmt {
             AbstractExpression oExpr = oColInfo.expression;
             boolean foundIt = false;
             // Hope there are not too many group by columns.
+            // This is an N^2 kind of behavior.  1000 group by
+            // columns would be a bad thing.
             for (int idx = 0; idx < numGroupByColumns; idx += 1) {
                 if (0 <= gbOrigIndexes.get(idx)) {
                     ParsedColInfo gColInfo = m_groupByColumns.get(idx);
@@ -2781,7 +2784,8 @@ public class ParsedSelectStmt extends AbstractParsedStmt {
                 }
             }
             // If we didn't find the order by column
-            // we must quit now and return null.
+            // we must quit now and return null.  This
+            // order column is not in the group by list.
             if (! foundIt) {
                 return null;
             }
