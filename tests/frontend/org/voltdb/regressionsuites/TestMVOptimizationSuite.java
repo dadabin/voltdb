@@ -92,9 +92,7 @@ public class TestMVOptimizationSuite extends RegressionSuite {
             final Client client = getClient();
             populateTablesWithViews(client, views);
             return client;
-        } catch (IOException ex) {
-            fail(ex.getMessage());
-        } catch (ProcCallException ex) {
+        } catch (IOException | ProcCallException ex) {
             fail(ex.getMessage());
         }
         return null;
@@ -160,17 +158,16 @@ public class TestMVOptimizationSuite extends RegressionSuite {
             VoltServerConfig config = new LocalCluster("test-mv-optimization.jar", 1, 1, 0, BackendTarget.NATIVE_EE_JNI);
             setupSchema(project);
             assertTrue(config.compile(project));
-            builder.addServerConfig(config);
+            builder.addServerConfig(config, false);
 
-            project = new VoltProjectBuilder();
+            /*project = new VoltProjectBuilder();
             config = new LocalCluster("test-mv-optimization.jar", 3, 1, 0, BackendTarget.NATIVE_EE_JNI);
             setupSchema(project);
             assertTrue(config.compile(project));
-            builder.addServerConfig(config);
+            builder.addServerConfig(config);*/
             return builder;
-        }
-        catch (IOException excp) {
-            fail();
+        } catch (IOException excp) {
+            fail("Failure setting up schema for project");
         }
         return null;
     }
